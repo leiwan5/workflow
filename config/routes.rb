@@ -3,9 +3,8 @@ Workflow::Application.routes.draw do
   resources :process_definitions do
     member do
       get :properties
+      get :diagram
     end
   end
   resources :tasks
-  
-  root to: 'deployments#index'
 end
