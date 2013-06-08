@@ -17,17 +17,35 @@ class ProcessDefinitionsController < ApplicationController
   def show
     definition = Activiti[:repository].createProcessDefinitionQuery.processDefinitionId(params[:id]).singleResult
     if definition
-      render :json => {
-        id: definition.getId,
-        name: definition.getName,
-        key: definition.getKey,
-        deployment_id: definition.getDeploymentId,
-        version: definition.getVersion,
-        diagram_resource_name: definition.getDiagramResourceName,
-        resource_name: definition.getResourceName
-      }
+      respond_to do |format|
+        format.json do
+          render :json => {
+            id: definition.getId,
+            name: definition.getName,
+            key: definition.getKey,
+            deployment_id: definition.getDeploymentId,
+            version: definition.getVersion,
+            diagram_resource_name: definition.getDiagramResourceName,
+            resource_name: definition.getResourceName
+          }
+        end
+
+        format.bpmn do
+          stream = Activiti[:repository].getResourceAsStream(
+            definition.getDeploymentId, definition.getResourceName
+          )
+          size = stream.available
+          bytes = Java::byte[size].new
+          stream.read bytes, 0, size
+          send_data bytes.to_s, disposition: 'inline', type: 'text/xml',
+            filename: definition.getResourceName
+        end
+      end
     else
-      render json: {error: 'not found'}, status: 404
+      render json: {
+          message: 'not found',
+          failed: true
+        }, status: 404
     end    
   end
 
@@ -47,7 +65,10 @@ class ProcessDefinitionsController < ApplicationController
       end
       render json: data
     else
-      render json: {error: 'not found'}, status: 404
+      render json: {
+          message: 'not found',
+          failed: true
+        }, status: 404
     end
   end
 

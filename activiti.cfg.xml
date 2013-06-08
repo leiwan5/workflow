@@ -15,4 +15,6 @@
     <property name="jobExecutorActivate" value="true" />
   </bean>
 
+  <bean id="testBean" class="com.ctyle.oademo.activiti.TestBean"></bean>
+
 </beans>

@@ -17,6 +17,7 @@ Activiti = {
   repository: activiti_process_engine.getRepositoryService,
   task: activiti_process_engine.getTaskService,
   form: activiti_process_engine.getFormService,
+  history: activiti_process_engine.getHistoryService
 }
 
 # Set up gems listed in the Gemfile.
