@@ -15,6 +15,7 @@ Workflow::Application.routes.draw do
       post :claim
       post :unclaim
       post :complete
+      get :properties
     end
   end
 end

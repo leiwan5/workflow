@@ -18,26 +18,6 @@ class TasksController < ApplicationController
     render json: items
   end
 
-  def complete
-    task = Activiti[:task].createTaskQuery().taskId(params[:id]).singleResult
-    if task
-      begin
-        Activiti[:task].complete task.getId
-        render json: {}
-      rescue Exception => e
-        render json: {
-          failed: true,
-          message: e.message
-        }
-      end
-    else
-      render json: {
-        failed: true,
-        message: 'task not found'
-      }
-    end
-  end
-
   def claim
     task = Activiti[:task].createTaskQuery().taskId(params[:id]).singleResult
     if task
@@ -64,6 +44,57 @@ class TasksController < ApplicationController
       begin
         Activiti[:task].claim task.getId, nil
         render json: {}
+      rescue Exception => e
+        render json: {
+          failed: true,
+          message: e.message
+        }
+      end
+    else
+      render json: {
+        failed: true,
+        message: 'task not found'
+      }
+    end
+  end
+
+  def complete
+    task = Activiti[:task].createTaskQuery().taskId(params[:id]).singleResult
+    if task
+      begin
+        variables = java.util.HashMap.new params[:variables]
+        Activiti[:task].complete task.getId, variables
+        render json: {}
+      rescue Exception => e
+        render json: {
+          failed: true,
+          message: e.message
+        }
+      end
+    else
+      render json: {
+        failed: true,
+        message: 'task not found'
+      }
+    end
+  end
+
+  def properties
+    task = Activiti[:task].createTaskQuery().taskId(params[:id]).singleResult
+    if task
+      begin
+        properties = Activiti[:form].getTaskFormData(task.getId).getFormProperties().map do |item|
+          {
+            id: item.getId,
+            name: item.getName,
+            value: item.getValue,
+            type: item.getType.getName,
+            required: item.isRequired,
+            readable: item.isReadable,
+            writeable: item.isWritable
+          }
+        end
+        render json: properties
       rescue Exception => e
         render json: {
           failed: true,
