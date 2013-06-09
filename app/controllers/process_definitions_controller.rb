@@ -74,20 +74,27 @@ class ProcessDefinitionsController < ApplicationController
 
   def diagram
     definition = Activiti[:repository].createProcessDefinitionQuery.processDefinitionId(params[:id]).singleResult
-    stream = Activiti[:repository].getResourceAsStream(definition.getDeploymentId(), definition.getDiagramResourceName())
-    size = stream.available
-    bytes = Java::byte[size].new
-    stream.read bytes, 0, size
+    if definition
+      stream = Activiti[:repository].getResourceAsStream(definition.getDeploymentId(), definition.getDiagramResourceName())
+      size = stream.available
+      bytes = Java::byte[size].new
+      stream.read bytes, 0, size
 
-    respond_to do |format|
-      format.png do
-        send_data bytes.to_s, disposition: 'inline', type: 'image/png', filename: definition.getDiagramResourceName()
+      respond_to do |format|
+        format.png do
+          send_data bytes.to_s, disposition: 'inline', type: 'image/png', filename: definition.getDiagramResourceName()
+        end
+        format.json do
+          render json: {
+            data: Base64::strict_encode64(bytes.to_s)
+          }        
+        end
       end
-      format.json do
-        render json: {
-          data: Base64::strict_encode64(bytes.to_s)
-        }        
-      end
+    else
+      render json: {
+          message: 'not found',
+          failed: true
+        }, status: 404
     end
   end
 end
