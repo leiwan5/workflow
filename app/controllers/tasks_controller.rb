@@ -2,6 +2,12 @@ class TasksController < ApplicationController
   def index
     query = Activiti[:task].createTaskQuery()
     query = query.processInstanceId(params[:process_instance_id]) if params[:process_instance_id]
+    query = query.taskUnassigned if params[:unassigned].to_s == 'true'
+    [:assignee, :candidate_user, :name_like,
+      :candidate_group, :candidate_group_in, :name].each do |item|
+      query = query.send('task' + item.to_s.camelize, params[item]) if params[item]
+    end
+
     items = query.list.map do |task|
       {
         :id => task.getId,
