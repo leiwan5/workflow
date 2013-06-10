@@ -1,4 +1,6 @@
 class TasksController < ApplicationController
+
+  # 获取任务列表
   def index
     query = Activiti[:task].createTaskQuery()
     query = query.processInstanceId(params[:process_instance_id]) if params[:process_instance_id]
@@ -24,6 +26,7 @@ class TasksController < ApplicationController
     render json: items
   end
 
+  # 分配任务
   def claim
     task = Activiti[:task].createTaskQuery().taskId(params[:id]).singleResult
     if task
@@ -44,6 +47,7 @@ class TasksController < ApplicationController
     end
   end
 
+  # 取消分配任务
   def unclaim
     task = Activiti[:task].createTaskQuery().taskId(params[:id]).singleResult
     if task
@@ -64,6 +68,7 @@ class TasksController < ApplicationController
     end
   end
 
+  # 完成任务
   def complete
     task = Activiti[:task].createTaskQuery().taskId(params[:id]).singleResult
     if task
@@ -85,6 +90,7 @@ class TasksController < ApplicationController
     end
   end
 
+  # 任务表单属性
   def properties
     task = Activiti[:task].createTaskQuery().taskId(params[:id]).singleResult
     if task
