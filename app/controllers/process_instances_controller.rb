@@ -19,6 +19,37 @@ class ProcessInstancesController < ApplicationController
     
   end
 
+  def diagram
+    instance = Activiti[:history].createHistoricProcessInstanceQuery.processInstanceId(params[:id]).singleResult
+    execution = Activiti[:runtime].createExecutionQuery.processInstanceId(params[:id]).singleResult
+    definition = Activiti[:repository].createProcessDefinitionQuery.processDefinitionId(instance.getProcessDefinitionId).singleResult if instance
+    bpmn_model = Activiti[:repository].getBpmnModel(instance.getProcessDefinitionId) if instance
+    if instance and execution and definition and bpmn_model
+      stream = org.activiti.engine.impl.bpmn.diagram.ProcessDiagramGenerator.generateDiagram(
+          bpmn_model, 'png', Activiti[:runtime].getActiveActivityIds(execution.getId)
+        )
+      size = stream.available
+      bytes = Java::byte[size].new
+      stream.read bytes, 0, size
+
+      respond_to do |format|
+        format.png do
+          send_data bytes.to_s, disposition: 'inline', type: 'image/png', filename: definition.getDiagramResourceName()
+        end
+        format.json do
+          render json: {
+            data: Base64::strict_encode64(bytes.to_s)
+          }        
+        end
+      end
+    else
+      render json: {
+          message: 'not found',
+          failed: true
+        }, status: 404
+    end
+  end
+
   def create
     definition = Activiti[:repository].createProcessDefinitionQuery.processDefinitionId(params[:process_definition_id]).singleResult
     if definition

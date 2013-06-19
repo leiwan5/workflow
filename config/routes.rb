@@ -9,6 +9,9 @@ Workflow::Application.routes.draw do
   end
   resources :process_instances do
     resources :tasks
+    member do
+      get :diagram
+    end
   end
   resources :tasks do
     member do
