@@ -9,6 +9,7 @@ Workflow::Application.routes.draw do
   end
   resources :process_instances do
     resources :tasks
+    resources :variables
     member do
       get :diagram
     end
@@ -18,7 +19,7 @@ Workflow::Application.routes.draw do
       post :claim
       post :unclaim
       post :complete
-      get :properties
+      get :form_properties
     end
   end
 end

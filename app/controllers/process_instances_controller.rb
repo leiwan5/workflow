@@ -16,7 +16,21 @@ class ProcessInstancesController < ApplicationController
   end
 
   def show
-    
+    instance = Activiti[:history].createHistoricProcessInstanceQuery.processInstanceId(params[:id]).singleResult
+    if instance
+      render json: {
+        :id => instance.getId,
+        :definition_id => instance.getProcessDefinitionId,
+        :start_time => Time.at(instance.getStartTime.getTime/1000),
+        :start_user_id => instance.getStartUserId,
+        :business_key => instance.getBusinessKey
+      }
+    else
+      render json: {
+        failed: true,
+        message: 'not found'
+      }, status: 404
+    end
   end
 
   def diagram
@@ -71,6 +85,28 @@ class ProcessInstancesController < ApplicationController
         failed: true,
         message: 'process definition not found'
       }
+    end
+  end
+
+  def destroy
+    instance = Activiti[:history].createHistoricProcessInstanceQuery.processInstanceId(params[:id]).singleResult
+    if instance
+      begin
+        Activiti[:history].deleteHistoricProcessInstance instance.getId
+        render json: {
+          id: instance.getId
+        }
+      rescue Exception => e
+        render json: {
+          failed: true,
+          message: e.to_s
+        }
+      end
+    else
+      render json: {
+        failed: true,
+        message: 'not found'
+      }, status: 404
     end
   end
 end

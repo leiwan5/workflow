@@ -91,7 +91,7 @@ class TasksController < ApplicationController
   end
 
   # 任务表单属性
-  def properties
+  def form_properties
     task = Activiti[:task].createTaskQuery().taskId(params[:id]).singleResult
     if task
       begin
