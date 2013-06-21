@@ -97,4 +97,79 @@ class ProcessDefinitionsController < ApplicationController
         }, status: 404
     end
   end
+
+  def bpmn_model
+    definition = Activiti[:repository].createProcessDefinitionQuery.processDefinitionId(params[:id]).singleResult
+    if definition
+      model = Activiti[:repository].getBpmnModel(definition.getId)
+      elements = model.getMainProcess.getFlowElements
+
+      nodes = elements.find_all{|el| el.is_a? org.activiti.bpmn.model.FlowNode}.map do |el|
+        if el.is_a? org.activiti.bpmn.model.StartEvent
+          properties = el.getFormProperties.map do |item|
+            {
+              name: item.getName,
+              variable: item.getVariable,
+              type: item.getType,
+              default_expression: item.getDefaultExpression,
+              required: item.isRequired,
+              readable: item.isReadable,
+              writeable: item.isWriteable,
+              form_values: item.getFormValues.map{|v| v.getName}
+            }
+          end
+          {
+            name: el.getName,
+            documentation: el.getDocumentation,
+            type: :start_event,
+            form_properties: properties
+          }
+        # elsif el.is_a? org.activiti.bpmn.model.EndEvent
+        #   {
+        #     name: el.getName,
+        #     documentation: el.getDocumentation,
+        #     type: :end_event
+        #   }
+        elsif el.is_a? org.activiti.bpmn.model.UserTask
+          properties = el.getFormProperties.map do |item|
+            {
+              name: item.getName,
+              variable: item.getVariable,
+              type: item.getType,
+              default_expression: item.getDefaultExpression,
+              required: item.isRequired,
+              readable: item.isReadable,
+              writeable: item.isWriteable,
+              form_values: item.getFormValues.map{|v| v.getName}
+            }
+          end
+          {
+            name: el.getName,
+            documentation: el.getDocumentation,
+            type: :user_task,
+            assignee: el.getAssignee,
+            priority: el.getPriority,
+            due_date: el.getDueDate,
+            candidate_users: el.getCandidateUsers.to_a,
+            candidate_groups: el.getCandidateGroups.to_a,
+            form_properties: properties            
+          }
+        else
+          {
+            name: el.getName,
+            documentation: el.getDocumentation,
+            type: el.class.to_s.split('::').last.underscore
+          }
+        end
+      end
+      render json: {
+        nodes: nodes
+      }        
+    else
+      render json: {
+          message: 'not found',
+          failed: true
+        }, status: 404
+    end
+  end
 end

@@ -5,6 +5,7 @@ Workflow::Application.routes.draw do
     member do
       get :properties
       get :diagram
+      get :bpmn_model
     end
   end
   resources :process_instances do

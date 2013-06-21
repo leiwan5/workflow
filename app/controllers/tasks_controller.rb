@@ -103,7 +103,7 @@ class TasksController < ApplicationController
             type: item.getType.getName,
             required: item.isRequired,
             readable: item.isReadable,
-            writeable: item.isWritable
+            writeable: item.isWriteable
           }
         end
         render json: properties
