@@ -108,7 +108,7 @@ class ProcessDefinitionsController < ApplicationController
         if el.is_a? org.activiti.bpmn.model.StartEvent
           properties = el.getFormProperties.map do |item|
             {
-              name: item.getName,
+              name: string_fix(item.getName),
               variable: item.getVariable,
               type: item.getType,
               default_expression: item.getDefaultExpression,
@@ -119,8 +119,8 @@ class ProcessDefinitionsController < ApplicationController
             }
           end
           {
-            name: el.getName,
-            documentation: el.getDocumentation,
+            name: string_fix(el.getName),
+            documentation: string_fix(el.getDocumentation),
             type: :start_event,
             form_properties: properties
           }
@@ -133,7 +133,7 @@ class ProcessDefinitionsController < ApplicationController
         elsif el.is_a? org.activiti.bpmn.model.UserTask
           properties = el.getFormProperties.map do |item|
             {
-              name: item.getName,
+              name: string_fix(item.getName),
               variable: item.getVariable,
               type: item.getType,
               default_expression: item.getDefaultExpression,
@@ -144,8 +144,8 @@ class ProcessDefinitionsController < ApplicationController
             }
           end
           {
-            name: el.getName,
-            documentation: el.getDocumentation,
+            name: string_fix(el.getName),
+            documentation: string_fix(el.getDocumentation),
             type: :user_task,
             assignee: el.getAssignee,
             priority: el.getPriority,
@@ -156,7 +156,7 @@ class ProcessDefinitionsController < ApplicationController
           }
         else
           {
-            name: el.getName,
+            name: string_fix(el.getName),
             documentation: el.getDocumentation,
             type: el.class.to_s.split('::').last.underscore
           }
