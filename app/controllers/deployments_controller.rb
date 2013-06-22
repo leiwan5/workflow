@@ -14,7 +14,7 @@ class DeploymentsController < ApplicationController
   def create
     if params[:file].is_a? ActionDispatch::Http::UploadedFile
       filename = params[:file].original_filename
-      data = params[:file].read
+      data = params[:file].read.force_encoding('UTF-8')
     else
       filename = params[:file][:name]
       data = params[:file][:data]
