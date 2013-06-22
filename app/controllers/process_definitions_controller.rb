@@ -124,12 +124,12 @@ class ProcessDefinitionsController < ApplicationController
             type: :start_event,
             form_properties: properties
           }
-        # elsif el.is_a? org.activiti.bpmn.model.EndEvent
-        #   {
-        #     name: el.getName,
-        #     documentation: el.getDocumentation,
-        #     type: :end_event
-        #   }
+        elsif el.is_a? org.activiti.bpmn.model.EndEvent
+          {
+            name: el.getName,
+            documentation: el.getDocumentation,
+            type: :end_event
+          }
         elsif el.is_a? org.activiti.bpmn.model.UserTask
           properties = el.getFormProperties.map do |item|
             {
